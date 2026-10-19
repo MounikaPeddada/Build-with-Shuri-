@@ -78,5 +78,5 @@ export function useCircuit() {
     localStorage.removeItem('shuri_circuit_edges');
   }, [setNodes, setEdges]);
 
-  return { nodes, edges, onNodesChange, onEdgesChange, onConnect, addComponent, resetCircuit };
+  return { nodes, edges, onNodesChange, onEdgesChange, onConnect, addComponent, resetCircuit,setNodes };
 }

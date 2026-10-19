@@ -2,30 +2,60 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import subprocess
+import tempfile
+import os
 
 app = FastAPI()
 
-# THIS IS CRUCIAL: React runs on port 5173, FastAPI runs on 8000.
-# Without CORS, the browser will block the request.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, change this to your actual domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Define what the frontend is sending
 class SketchPayload(BaseModel):
     code: str
 
 @app.post("/compile")
 async def compile_sketch(payload: SketchPayload):
-    print(f"Received code:\n{payload.code}")
+    print("Received code for compilation...")
     
-    # We aren't compiling yet. We just want to see a 200 OK.
-    return {
-        "status": "success",
-        "message": "Code received successfully by the backend!",
-        "hex_file": "fake_hex_data_placeholder"
-    }
+    with tempfile.TemporaryDirectory() as temp_dir:
+        sketch_path = os.path.join(temp_dir, "sketch.ino")
+        with open(sketch_path, "w") as f:
+            f.write(payload.code)
+        
+        # Compile using arduino-cli for Arduino Uno
+        # NOTE: Ensure arduino-cli is in your PATH!
+        cmd = [
+            "arduino-cli", "compile",
+            "--fqbn", "arduino:avr:uno",
+            "--output-dir", temp_dir,
+            sketch_path
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            print("Compilation error:", result.stderr)
+            return {
+                "status": "error",
+                "message": result.stderr
+            }
+        
+        # Read the generated .hex file
+        hex_path = os.path.join(temp_dir, "sketch.ino.hex")
+        if not os.path.exists(hex_path):
+            return {"status": "error", "message": "Hex file was not generated."}
+            
+        with open(hex_path, "r") as f:
+            hex_content = f.read()
+            
+        print("Compilation successful!")
+        return {
+            "status": "success",
+            "hex_content": hex_content
+        }
