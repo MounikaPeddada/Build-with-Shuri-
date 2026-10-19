@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build and production output
+dist/
+dist-zip/
+
+# Environment Variables & Secrets (Prevents leaking API keys)
+.env
+.env.local
+*.env
+
+# System and OS Files
+.DS_Store
+Thumbs.db
+
+# Logs and debug files
+npm-debug.log*
+yarn-debug.log*
+*.log
+
+# Editor configuration
+.vscode/
+.idea/
+
+# Backend & Build Binaries
+*.hex
+*.elf
+__pycache__/
+*.py[cod]
+.venv/

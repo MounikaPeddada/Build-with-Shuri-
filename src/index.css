@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-ink: #17262e;
+  --color-muted: #5b6f78;
+  --color-line: #d5dde1;
+  --color-bench: #e9eef0;
+  --color-panel: #ffffff;
+  --color-panel-alt: #f4f7f8;
+  --color-trace: #0b7a85;
+  --color-warn: #d9731f;
+  --color-fail: #c23b3b;
+  --color-good: #2f8a5b;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-bench);
+  overflow: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-trace);
+  outline-offset: 2px;
+}
+
+/* ---- React Flow tweaks ---- */
+.react-flow {
+  --xy-background-color: #09090b;
+  --xy-controls-button-background-color: #18181b;
+  --xy-controls-button-background-color-hover: #27272a;
+  --xy-controls-button-color: #e4e4e7;
+  --xy-controls-button-color-hover: #ffffff;
+  --xy-controls-button-border-color: #27272a;
+  --xy-attribution-background-color: rgb(24 24 27 / 0.8);
+  background: #09090b;
+}
+.react-flow__attribution a {
+  color: #a1a1aa;
+}
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #f4d35e !important;
+}
+
+/* A header pin: gold dot with a dark ring, glows when hovered or mid-wire. */
+.react-flow__handle.pin {
+  width: 12px;
+  height: 12px;
+  background: #e2b93b;
+  border: 2px solid var(--color-ink);
+  border-radius: 9999px;
+}
+.react-flow__handle.pin:hover,
+.react-flow__handle.pin.connectingfrom,
+.react-flow__handle.pin.connectingto {
+  background: #f4d35e;
+  box-shadow: 0 0 0 4px rgb(244 211 94 / 0.45);
+}
+
+.react-flow__edge-path {
+  stroke-linecap: round;
+}
