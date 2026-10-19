@@ -1,21 +1,48 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react'; // Added useEffect
 import { addEdge, useEdgesState, useNodesState } from '@xyflow/react';
 import { COMPONENT_CATALOG } from '../lib/componentCatalog';
 
 export const WIRE_STYLE = { stroke: '#2dd4bf', strokeWidth: 3 };
 
-// A starter bench: one board, one LED and one resistor, nothing wired yet.
 const INITIAL_NODES = [
   { id: 'arduino-1', type: 'arduino', position: { x: 40, y: 150 }, data: { label: 'Arduino Uno' } },
   { id: 'resistor-1', type: 'resistor', position: { x: 540, y: 100 }, data: { label: 'Resistor', value: '220 Ω' } },
   { id: 'led-1', type: 'led', position: { x: 580, y: 230 }, data: { label: 'LED', color: '#e5484d' } },
 ];
 
-/** Owns the circuit graph (parts + wires) so the canvas and the linter share it. */
+// 1. Helper functions to load from localStorage
+const loadNodes = () => {
+  try {
+    const saved = localStorage.getItem('shuri_circuit_nodes');
+    return saved ? JSON.parse(saved) : INITIAL_NODES;
+  } catch {
+    return INITIAL_NODES;
+  }
+};
+
+const loadEdges = () => {
+  try {
+    const saved = localStorage.getItem('shuri_circuit_edges');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
+
 export function useCircuit() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  // 2. Initialize the state using the loaders
+  const [nodes, setNodes, onNodesChange] = useNodesState(loadNodes());
+  const [edges, setEdges, onEdgesChange] = useEdgesState(loadEdges());
   const counter = useRef(10);
+
+  // 3. Save to localStorage whenever nodes or edges change
+  useEffect(() => {
+    localStorage.setItem('shuri_circuit_nodes', JSON.stringify(nodes));
+  }, [nodes]);
+
+  useEffect(() => {
+    localStorage.setItem('shuri_circuit_edges', JSON.stringify(edges));
+  }, [edges]);
 
   const onConnect = useCallback(
     (connection) =>
@@ -25,7 +52,6 @@ export function useCircuit() {
     [setEdges],
   );
 
-  // `position` is in canvas coordinates. If omitted (click-to-add), stagger new parts.
   const addComponent = useCallback(
     (type, position) => {
       const def = COMPONENT_CATALOG.find((c) => c.type === type);
@@ -44,5 +70,13 @@ export function useCircuit() {
     [setNodes],
   );
 
-  return { nodes, edges, onNodesChange, onEdgesChange, onConnect, addComponent };
+  // Optional: Add a reset function if you ever want to clear the board
+  const resetCircuit = useCallback(() => {
+    setNodes(INITIAL_NODES);
+    setEdges([]);
+    localStorage.removeItem('shuri_circuit_nodes');
+    localStorage.removeItem('shuri_circuit_edges');
+  }, [setNodes, setEdges]);
+
+  return { nodes, edges, onNodesChange, onEdgesChange, onConnect, addComponent, resetCircuit };
 }

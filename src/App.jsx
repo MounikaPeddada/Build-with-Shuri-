@@ -5,13 +5,13 @@ import CircuitWorkspace from './components/canvas/CircuitWorkspace';
 import CodeEditor from './components/editor/CodeEditor';
 import AssistantPanel from './components/assistant/AssistantPanel';
 import { useCircuit } from './hooks/useCircuit';
-import { lintCircuit } from './lib/linter';
+import { evaluateRules } from './lib/rules';
 import { DEFAULT_SKETCH } from './lib/defaultSketch';
 
 export default function App() {
   const circuit = useCircuit();
   const [code, setCode] = useState(DEFAULT_SKETCH);
-  const hints = useMemo(() => lintCircuit(circuit.nodes, circuit.edges), [circuit.nodes, circuit.edges]);
+  const hints = useMemo(() => evaluateRules(circuit.nodes, circuit.edges), [circuit.nodes, circuit.edges]);
 
   return (
     <div className="flex h-full flex-col">
