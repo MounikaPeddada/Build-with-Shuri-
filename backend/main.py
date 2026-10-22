@@ -24,17 +24,21 @@ async def compile_sketch(payload: SketchPayload):
     print("Received code for compilation...")
     
     with tempfile.TemporaryDirectory() as temp_dir:
-        sketch_path = os.path.join(temp_dir, "sketch.ino")
+        # 1. Create a subfolder named 'sketch' (must match the .ino file name)
+        sketch_folder = os.path.join(temp_dir, "sketch")
+        os.makedirs(sketch_folder, exist_ok=True)
+        
+        # 2. Write the code inside 'sketch/sketch.ino'
+        sketch_path = os.path.join(sketch_folder, "sketch.ino")
         with open(sketch_path, "w") as f:
             f.write(payload.code)
         
-        # Compile using arduino-cli for Arduino Uno
-        # NOTE: Ensure arduino-cli is in your PATH!
+        # 3. Compile using arduino-cli, pointing to the FOLDER, not the file
         cmd = [
             "arduino-cli", "compile",
             "--fqbn", "arduino:avr:uno",
             "--output-dir", temp_dir,
-            sketch_path
+            sketch_folder  # <--- Pass the folder path here
         ]
         
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -46,7 +50,7 @@ async def compile_sketch(payload: SketchPayload):
                 "message": result.stderr
             }
         
-        # Read the generated .hex file
+        # 4. Read the generated .hex file
         hex_path = os.path.join(temp_dir, "sketch.ino.hex")
         if not os.path.exists(hex_path):
             return {"status": "error", "message": "Hex file was not generated."}

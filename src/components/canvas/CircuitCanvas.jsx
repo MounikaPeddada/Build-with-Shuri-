@@ -4,7 +4,8 @@ import { nodeTypes } from './nodes';
 import { DRAG_MIME } from '../../lib/componentCatalog';
 import { WIRE_STYLE } from '../../hooks/useCircuit';
 
-export default function CircuitCanvas({ circuit }) {
+// 1. Accept displayNodes as a prop
+export default function CircuitCanvas({ circuit, displayNodes }) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addComponent } = circuit;
   const { screenToFlowPosition } = useReactFlow();
 
@@ -26,7 +27,7 @@ export default function CircuitCanvas({ circuit }) {
   return (
     <div className="h-full min-w-0 flex-1">
       <ReactFlow
-        nodes={nodes}
+        nodes={displayNodes} // 2. Use displayNodes here instead of nodes
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
